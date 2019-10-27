@@ -30,15 +30,14 @@ export const Login = (email, password) => {
   });
 };
 
-
-export const GetUsersFrequency = (token) => {
+export const GetUsersFrequency = token => {
   return new Promise((resolve, reject) => {
     let data = {
       method: "GET",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "Authorization": token
+        Authorization: token
       }
     };
     let status = undefined;
@@ -57,3 +56,55 @@ export const GetUsersFrequency = (token) => {
   });
 };
 
+export const GetUsersFrequencyCountryWise = (token, textCode) => {
+  return new Promise((resolve, reject) => {
+    let data = {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: token,
+        textCode: textCode
+      }
+    };
+    let status = undefined;
+    fetch(`${IP_ADDRESS}/usersFrequency/countryWise/`, data)
+      .then(res => {
+        status = res.status;
+        return res.json();
+      })
+      .then(responseObj => {
+        return resolve({ status, data: responseObj });
+      })
+      .catch(err => {
+        console.log(data);
+        return reject(err);
+      });
+  });
+};
+
+export const GetUsersUsersDeviceCountryWise = token => {
+  return new Promise((resolve, reject) => {
+    let data = {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: token
+      }
+    };
+    let status = undefined;
+    fetch(`${IP_ADDRESS}/usersDeviceInfo/`, data)
+      .then(res => {
+        status = res.status;
+        return res.json();
+      })
+      .then(responseObj => {
+        return resolve({ status, data: responseObj });
+      })
+      .catch(err => {
+        console.log(data);
+        return reject(err);
+      });
+  });
+};

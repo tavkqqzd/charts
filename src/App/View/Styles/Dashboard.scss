@@ -17,3 +17,77 @@
     }
   }
 }
+
+.table_td {
+  font-size: 13px;
+  font-weight: 500;
+  color: #545454;
+}
+
+.table_tr_header {
+  border-bottom: 1px solid #d8d8d8;
+  font-size: 13px;
+}
+
+.tableFixHead {
+  overflow-y: auto;
+  // height: 100px;
+  margin-left: 0px;
+  background-color: #fff !important;
+  box-shadow: 0 1px 5px #e0e0e0 !important;
+  height: 325px;
+  border: none !important;
+  // height: 300px;
+  margin: 10px 0;
+}
+
+.tableFixHead thead th {
+  position: sticky;
+  top: 0;
+}
+
+.chartLabel {
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  margin: 0;
+  margin-left: -15px;
+  color: #545454;
+}
+
+.chartLabelworld {
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  margin: 0;
+  color: #545454;
+  overflow-y: auto;
+}
+
+/* Just common table stuff. Really. */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  scrollbar-width: thin;
+  > thead {
+    th {
+      border-bottom: 0px !important;
+    }
+  }
+  > tbody {
+    border-top: 0px !important;
+  }
+}
+
+th,
+td {
+  border-top: none !important;
+  padding: 8px 16px !important;
+}
+th {
+  background: #ededed;
+}
+
+tr {
+  border-bottom: 1px solid #e8e8e8;
+}
