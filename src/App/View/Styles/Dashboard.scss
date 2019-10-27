@@ -1,0 +1,19 @@
+.barchart_box {
+  justify-content: center;
+  > div {
+    background-color: #fff;
+    margin: 20px;
+    padding: 15px 0;
+    box-shadow: 0 1px 5px #e0e0e0;
+    cursor: pointer;
+    h6 {
+      font-size: 21px;
+      font-weight: 500;
+    }
+    p {
+      font-size: 17px;
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+}
