@@ -9,8 +9,8 @@ const DeviceTable = props => {
         <table>
           <thead>
             <tr className="table_tr">
-              <th className="table_tr_header">Device</th>
-              <th className="table_tr_header">Percentage</th>
+              <th className="table_tr_header text-center">Device</th>
+              <th className="table_tr_header text-center">Percentage</th>
             </tr>
           </thead>
           <tbody>

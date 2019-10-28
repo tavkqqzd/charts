@@ -18,6 +18,39 @@
   }
 }
 
+.rf_box_w_elevation {
+  // padding-left: 15px;
+  // padding-right: 15px;
+  background-color: #fff;
+  // width: 340px;
+  // margin: 5px;
+  box-shadow: 0 1px 5px #e0e0e0;
+}
+
+.rf_pie_chart {
+  background-color: #fff;
+  // width: 340px;
+  // margin: 5px;
+  // padding-left: 15px;
+  // padding-right: 15px;
+  box-shadow: 0 1px 5px #e0e0e0;
+  > div {
+    > div {
+      > div {
+        > div {
+          > svg {
+            > foreignObject {
+              > div {
+                text-align: left;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 .table_td {
   font-size: 13px;
   font-weight: 500;
