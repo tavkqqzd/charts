@@ -134,3 +134,32 @@ export const GetMainPosts = (token, type) => {
       });
   });
 };
+
+export const GetPostsByCountryFilter = (token, filterCode, typeCode, postTypeCode) => {
+  return new Promise((resolve, reject) => {
+    let data = {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: token
+      }
+    };
+    let status = undefined;
+    fetch(
+      `${IP_ADDRESS}/posts/countryWise/?filterType=${filterCode}&typeCode=${typeCode}&postType=${postTypeCode}`,
+      data
+    )
+      .then(res => {
+        status = res.status;
+        return res.json();
+      })
+      .then(responseObj => {
+        return resolve({ status, data: responseObj });
+      })
+      .catch(err => {
+        console.log(data);
+        return reject(err);
+      });
+  });
+};

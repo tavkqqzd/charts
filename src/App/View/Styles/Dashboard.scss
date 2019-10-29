@@ -18,6 +18,21 @@
   }
 }
 
+.card {
+  border: none !important;
+  > div {
+    h5 {
+      > button {
+        background-color: #f8f8f8 !important;
+      }
+    }
+  }
+}
+
+.card-header {
+  border: none !important;
+}
+
 .rf_box_w_elevation {
   // padding-left: 15px;
   // padding-right: 15px;

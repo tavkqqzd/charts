@@ -11,8 +11,8 @@ const PieChart = props => {
           options={props.options}
           series={props.userFreqPieChart}
           type="donut"
-          width="330"
-          height="330"
+          width="350"
+          height="350"
         />
       </div>
     </div>

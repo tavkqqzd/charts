@@ -247,7 +247,7 @@ class Dashboard extends React.Component {
     return (
       <div className="col-12" style={{ height: "100vh" }}>
         <div className="row">
-          <div className="col-2 barchart_box">
+          <div className="col-2 barchart_box" style={{ marginTop: "27px" }}>
             {!!usersFreq &&
               usersFreq.values.map(k => (
                 <div

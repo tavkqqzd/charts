@@ -1,11 +1,6 @@
 import React from "react";
 import cookie from "react-cookies";
-import {
-  GetMainPosts,
-  GetUsersFrequency,
-  GetUsersFrequencyCountryWise,
-  GetUsersUsersDeviceCountryWise
-} from "../../Network/api";
+import { GetMainPosts, GetPostsByCountryFilter } from "../../Network/api";
 import "../Styles/Dashboard.scss";
 import Chart from "react-apexcharts";
 import Map from "../../Components/Map/Map";
@@ -14,6 +9,7 @@ import DeviceTable from "../../Components/DeviceTable/DeviceTable";
 import ReactApexChart from "react-apexcharts";
 import PieChart from "../../Components/PieChart/PieChart";
 import BarChart from "../../Components/BarChart/BarChart";
+import PostCountryFilter from "../../Components/Table/PostCountryTable";
 
 var colors = [
   "#008FFB",
@@ -41,6 +37,15 @@ class Posts extends React.Component {
     userFreqPieChart: "",
     barChartData: "",
     options: {
+      plotOptions: {
+        pie: {
+          size: 70,
+          customScale: 1,
+          donut: {
+            size: "55%"
+          }
+        }
+      },
       noData: {
         text: "No data available"
       },
@@ -102,39 +107,66 @@ class Posts extends React.Component {
     valueTypes: "",
     valuesForValues: "",
     valuesForValuesType: "",
-    toDisplayValues: ""
+    toDisplayValues: "",
+    filterPageCountryData: "",
+    setTypeCode: 0,
+    applyCss: false,
+    filterCode: 0
   };
   componentDidMount() {
     let token = cookie.load("token");
     this.setState({ token: token });
     this.getValueOfPosts(token, this.state.typeOfPost);
+    this.GetPostsByCountryFilter(token, 0, 0, 1);
     if (token === undefined || token === "" || token === null || token.length < 10) {
       this.props.history.push("/");
     }
   }
 
+  stringTransform = str => {
+    return str.replace(/_/g, " ").toUpperCase();
+  };
+
+  /** API Calls happen here */
   getValueOfPosts = (token, typeOfPost) => {
     GetMainPosts(token, typeOfPost)
       .then(res => {
-        console.log("GetMainPosts res", res);
+        let data = this.createNewArrayToRenderForValues(res.data.values);
+        data.shift();
         this.setState({
-          values: this.createNewArrayToRenderForValues(res.data.values)
+          values: data
         });
       })
       .catch(err => console.log("err", err));
   };
-
+  /** API Calls happen here */
   getStatusOfPosts = (token, typeOfPost) => {
     GetMainPosts(token, typeOfPost)
       .then(res => {
-        console.log("GetMainPosts res", res);
+        let data = this.createNewArrayToRenderForValueTypes(res.data.value_types);
+        data.shift();
         this.setState({
-          valueTypes: this.createNewArrayToRenderForValueTypes(res.data.value_types)
+          valueTypes: data
         });
       })
       .catch(err => console.log("err", err));
   };
 
+  /** API Calls happen here */
+  GetPostsByCountryFilter = (token, filterCode, typeCode, postType) => {
+    GetPostsByCountryFilter(token, filterCode, typeCode, postType)
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            filterCode: filterCode,
+            filterPageCountryData: res.data
+          });
+        } else if (res.status === 404) {
+        } else if (res.status === 500) {
+        }
+      })
+      .catch(err => console.log("err", err));
+  };
   createNewArrayToRenderForValues = arr => {
     let arrayToPush = [];
     let object = {};
@@ -149,13 +181,29 @@ class Posts extends React.Component {
     );
     let extractValues = arrayToPush.map(k => k.y);
     extractValues.shift();
-    let lab = arrayToPush.map(k => k.key);
+    let lab = arrayToPush.map(k => this.stringTransform(k.key));
+    lab.shift();
     this.setState({ toDisplayValues: extractValues });
     this.setState(prevState => ({
       options: {
         ...prevState.options,
         labels: lab
       }
+    }));
+    this.setState(prevState => ({
+      barChartOptions: {
+        ...prevState.barChartOptions,
+        xaxis: {
+          ...prevState.barChartOptions.xaxis,
+          categories: lab
+        }
+      },
+      series: [
+        {
+          ...prevState.series[0],
+          data: extractValues
+        }
+      ]
     }));
     return arrayToPush;
   };
@@ -168,13 +216,14 @@ class Posts extends React.Component {
         (object = {}),
         (object["key"] = Object.keys(k)[0]),
         (object["y"] = Object.values(k)[0]),
-        (object["filterType"] = k.typeCode),
+        (object["filterType"] = k.filterType),
         arrayToPush.push(object)
       )
     );
     let extractValues1 = arrayToPush.map(k => k.y);
     extractValues1.shift();
-    let lab = arrayToPush.map(k => k.key);
+    let lab = arrayToPush.map(k => this.stringTransform(k.key));
+    lab.shift();
     this.setState({ toDisplayValues: extractValues1 });
     this.setState(prevState => ({
       options: {
@@ -222,77 +271,135 @@ class Posts extends React.Component {
   };
   /** map methods end */
 
-  NavigateToPostsPage = () => {
-    this.props.history.push("/posts");
+  backToDashboard = () => {
+    this.props.history.push("/dashboard");
+  };
+
+  getTypeCode = typeCode => {
+    this.setState({ setTypeCode: typeCode });
   };
 
   render() {
     let token = cookie.load("token");
-    let { values, valueTypes, toDisplayValues, options, typeOfPost } = this.state;
+    let {
+      values,
+      valueTypes,
+      toDisplayValues,
+      options,
+      typeOfPost,
+      filterPageCountryData
+    } = this.state;
     return (
       <div className="col-12" style={{ height: "100vh" }}>
         <div className="row">
           <div className="col-2 barchart_box">
-            <div id="accordion">
-              <div class="card" onClick={() => this.getValueOfPosts(token, typeOfPost)}>
-                <div class="card-header" id="headingOne">
-                  <h5 class="mb-0">
+            <div className="d-flex" onClick={() => this.backToDashboard()}>
+              <div className="pl-3">
+                <img
+                  src={require("../../Assets/go-back-left-arrow.png")}
+                  style={{ width: "25px", height: "25px" }}
+                  alt="left-arrow"
+                />
+              </div>
+              <div className="pl-3 pt-1">DASHBOARD</div>
+            </div>
+            <div id="accordion" className="p-3">
+              <div className="card">
+                {/* <div className="card" onClick={() => this.getValueOfPosts(token, typeOfPost)}> */}
+                <div className="card-header" id="headingOne">
+                  <h5 className="mb-0">
                     <button
-                      class="btn btn-link"
+                      className="btn btn-default w-100 text-center"
                       data-toggle="collapse"
                       data-target="#collapseOne"
                       aria-expanded="true"
                       aria-controls="collapseOne"
+                      onClick={() => this.getValueOfPosts(token, typeOfPost)}
                     >
-                      Post Types
+                      POST TYPES
                     </button>
                   </h5>
                 </div>
 
                 <div
                   id="collapseOne"
-                  class="collapse show"
+                  className="collapse show"
                   aria-labelledby="headingOne"
                   data-parent="#accordion"
                 >
                   {!!values &&
                     values.map(k => (
-                      <div className="card-body">
-                        <div>{k.key}</div>
-                        <div>{k.y}</div>
+                      <div
+                        className="card-body"
+                        style={
+                          this.state.setTypeCode === k.typeCode
+                            ? {
+                                backgroundColor: "#0C94B4",
+                                color: "#FFF",
+                                fontSize: 18,
+                                fontWeight: 500
+                              }
+                            : {}
+                        }
+                        key={k.key}
+                        onClick={() => this.getTypeCode(k.typeCode)}
+                      >
+                        <div className="text-center">{this.stringTransform(k.key)}</div>
+                        <div className="text-center">{k.y}</div>
                       </div>
                     ))}
                 </div>
               </div>
             </div>
 
-            <div id="accordion">
-              <div class="card" onClick={() => this.getStatusOfPosts(token, typeOfPost)}>
-                <div class="card-header" id="headingTwo">
-                  <h5 class="mb-0">
+            <div id="accordion" className="p-3">
+              <div className="card" onClick={() => this.getStatusOfPosts(token, typeOfPost)}>
+                <div className="card-header" id="headingTwo">
+                  <h5 className="mb-0">
                     <button
-                      class="btn btn-link"
+                      className="btn btn-default w-100 text-center"
                       data-toggle="collapse"
                       data-target="#collapseTwo"
                       aria-expanded="true"
                       aria-controls="collapseTwo"
                     >
-                      Post Status
+                      POST STATUS
                     </button>
                   </h5>
                 </div>
 
                 <div
                   id="collapseTwo"
-                  class="collapse show"
+                  className="collapse show"
                   aria-labelledby="headingTwo"
                   data-parent="#accordion"
                 >
                   {!!valueTypes &&
                     valueTypes.map(k => (
-                      <div className="card-body">
-                        <div>{k.key}</div>
-                        <div>{k.y}</div>
+                      <div
+                        className="card-body"
+                        key={k.key}
+                        style={
+                          this.state.filterCode === k.filterType
+                            ? {
+                                backgroundColor: "#0C94B4",
+                                color: "#FFF",
+                                fontSize: 18,
+                                fontWeight: 500
+                              }
+                            : {}
+                        }
+                        onClick={() =>
+                          this.GetPostsByCountryFilter(
+                            token,
+                            k.filterType,
+                            this.state.setTypeCode,
+                            this.state.typeOfPost
+                          )
+                        }
+                      >
+                        <div className="text-center">{this.stringTransform(k.key)}</div>
+                        {/* <div className="text-center">{k.y}</div> */}
                       </div>
                     ))}
                 </div>
@@ -305,9 +412,9 @@ class Posts extends React.Component {
               <div className="col-4 rf_pie_chart">
                 <PieChart options={options} userFreqPieChart={toDisplayValues} />
               </div>
-              {/* <div className="col-4 rf_box_w_elevation">
-                <DeviceTable getUsersDeviceCountryWiseData={getUsersDeviceCountryWiseData} />
-              </div> */}
+              <div className="col-4 rf_box_w_elevation">
+                <PostCountryFilter getUsersDeviceCountryWiseData={filterPageCountryData.values} />
+              </div>
               {/* <div className="col-4 rf_box_w_elevation">
                 <BarChart
                   options={this.state.barChartOptions}
@@ -317,15 +424,15 @@ class Posts extends React.Component {
                 />
               </div> */}
             </div>
-            {/* <div className="row">
+            <div className="row">
               <div className="col-8 rf_box_w_elevation">
-                <Map getUsersFrequencyCountryWiseData={getUsersFrequencyCountryWiseData} />
+                <Map getUsersFrequencyCountryWiseData={filterPageCountryData} />
               </div>
-
+              {/* 
               <div className="col-4 text-center rf_box_w_elevation">
                 <Table getUsersFrequencyCountryWiseData={getUsersFrequencyCountryWiseData} />
-              </div>
-            </div> */}
+              </div> */}
+            </div>
           </div>
         </div>
       </div>
