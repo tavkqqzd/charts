@@ -240,10 +240,8 @@ class Dashboard extends React.Component {
       getUsersFrequencyCountryWiseData,
       getUsersDeviceCountryWiseData,
       options,
-      userFreqPieChart,
-      barChartOptions
+      userFreqPieChart
     } = this.state;
-    // console.log("usersFreq", usersFreq);
     return (
       <div className="col-12" style={{ height: "100vh" }}>
         <div className="row">
