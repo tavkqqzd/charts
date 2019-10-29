@@ -8,7 +8,6 @@ class Map extends React.Component {
       this.props.getUsersFrequencyCountryWiseData.values.map(
         data => (Worldmaparr[data.index.match(/[^()]+/g)[1]] = data.country)
       );
-
     return (
       <VectorMap
         map={"world_mill"}

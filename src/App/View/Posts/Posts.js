@@ -1,6 +1,7 @@
 import React from "react";
 import cookie from "react-cookies";
 import {
+  GetMainPosts,
   GetUsersFrequency,
   GetUsersFrequencyCountryWise,
   GetUsersUsersDeviceCountryWise
@@ -26,7 +27,7 @@ var colors = [
 ];
 const { getName } = require("country-list");
 
-class Dashboard extends React.Component {
+class Posts extends React.Component {
   state = {
     usersFreq: "",
     token: "",
@@ -93,102 +94,95 @@ class Dashboard extends React.Component {
       {
         data: []
       }
-    ]
+    ],
+    /** new page */
+    typeOfPost: 1,
+    mainPosts: "",
+    values: "",
+    valueTypes: "",
+    valuesForValues: "",
+    valuesForValuesType: "",
+    toDisplayValues: ""
   };
   componentDidMount() {
     let token = cookie.load("token");
     this.setState({ token: token });
+    this.getValueOfPosts(token, this.state.typeOfPost);
     if (token === undefined || token === "" || token === null || token.length < 10) {
       this.props.history.push("/");
     }
-    GetUsersFrequency(token)
+  }
+
+  getValueOfPosts = (token, typeOfPost) => {
+    GetMainPosts(token, typeOfPost)
       .then(res => {
+        console.log("GetMainPosts res", res);
         this.setState({
-          usersFreq: res.data[0],
-          userFreqPieChart: this.createNewArrayToRender(res.data[0].values)
+          values: this.createNewArrayToRenderForValues(res.data.values)
         });
       })
       .catch(err => console.log("err", err));
-    this.GetUsersFrequencyCountryWise(token, 0);
-  }
+  };
 
-  createNewArrayToRender = arr => {
+  getStatusOfPosts = (token, typeOfPost) => {
+    GetMainPosts(token, typeOfPost)
+      .then(res => {
+        console.log("GetMainPosts res", res);
+        this.setState({
+          valueTypes: this.createNewArrayToRenderForValueTypes(res.data.value_types)
+        });
+      })
+      .catch(err => console.log("err", err));
+  };
+
+  createNewArrayToRenderForValues = arr => {
     let arrayToPush = [];
     let object = {};
     arr.map(
       k => (
         (object = {}),
-        (object["label"] = k.label),
-        (object["y"] = k.value),
+        (object["key"] = Object.keys(k)[0]),
+        (object["y"] = Object.values(k)[0]),
+        (object["typeCode"] = k.typeCode),
         arrayToPush.push(object)
       )
     );
-    let ar = arrayToPush.map(k => k.y);
-    let lab = arr.map(k => k.label);
+    let extractValues = arrayToPush.map(k => k.y);
+    extractValues.shift();
+    let lab = arrayToPush.map(k => k.key);
+    this.setState({ toDisplayValues: extractValues });
     this.setState(prevState => ({
       options: {
         ...prevState.options,
         labels: lab
       }
     }));
-    return ar;
+    return arrayToPush;
   };
 
-  createNewArrayToRenderForBarChart = arr => {
+  createNewArrayToRenderForValueTypes = arr => {
     let arrayToPush = [];
     let object = {};
     arr.map(
       k => (
         (object = {}),
-        (object["label"] = k.label),
-        (object["y"] = k.value),
+        (object["key"] = Object.keys(k)[0]),
+        (object["y"] = Object.values(k)[0]),
+        (object["filterType"] = k.typeCode),
         arrayToPush.push(object)
       )
     );
-    let ar = arrayToPush.map(k => k.y);
-    let lab = arrayToPush.map(k => k.label);
-    let values = arr.map(k => k.value);
+    let extractValues1 = arrayToPush.map(k => k.y);
+    extractValues1.shift();
+    let lab = arrayToPush.map(k => k.key);
+    this.setState({ toDisplayValues: extractValues1 });
     this.setState(prevState => ({
-      barChartOptions: {
-        ...prevState.barChartOptions,
-        xaxis: {
-          ...prevState.barChartOptions.xaxis,
-          categories: lab
-        }
-      },
-      series: [
-        {
-          ...prevState.series[0],
-          data: values
-        }
-      ]
+      options: {
+        ...prevState.options,
+        labels: lab
+      }
     }));
-    return ar;
-  };
-
-  GetUsersFrequencyCountryWise = (token, textCode) => {
-    GetUsersFrequencyCountryWise(token, textCode)
-      .then(res => {
-        this.setState({ getUsersFrequencyCountryWiseData: res.data[0] }, () => {
-          this.GetUsersUsersDeviceCountryWise(token);
-        });
-      })
-      .catch(err => console.log("err", err));
-  };
-
-  GetUsersUsersDeviceCountryWise = token => {
-    GetUsersUsersDeviceCountryWise(token)
-      .then(res => {
-        this.setState(
-          {
-            getUsersDeviceCountryWiseData: res.data[0]
-          },
-          () => {
-            this.createNewArrayToRenderForBarChart(res.data[0].values);
-          }
-        );
-      })
-      .catch(err => console.log("err", err));
+    return arrayToPush;
   };
 
   /** map methods start */
@@ -224,7 +218,6 @@ class Dashboard extends React.Component {
           this.getCountriesNamesList();
         }
       );
-      console.log(countriesCodesArray);
     }
   };
   /** map methods end */
@@ -234,55 +227,97 @@ class Dashboard extends React.Component {
   };
 
   render() {
-    let {
-      usersFreq,
-      token,
-      getUsersFrequencyCountryWiseData,
-      getUsersDeviceCountryWiseData,
-      options,
-      userFreqPieChart,
-      barChartOptions
-    } = this.state;
-    // console.log("usersFreq", usersFreq);
+    let token = cookie.load("token");
+    let { values, valueTypes, toDisplayValues, options, typeOfPost } = this.state;
     return (
       <div className="col-12" style={{ height: "100vh" }}>
         <div className="row">
           <div className="col-2 barchart_box">
-            {!!usersFreq &&
-              usersFreq.values.map(k => (
-                <div
-                  key={k.textCode}
-                  // style={this.state.activeTextCode === data.textCode ? this.state.styles : {}}
-                  className="col-10 text-center"
-                  onClick={() => this.GetUsersFrequencyCountryWise(token, k.textCode)}
-                >
-                  <h6>{k.value}</h6>
-                  <p>{k.label}</p>
+            <div id="accordion">
+              <div class="card" onClick={() => this.getValueOfPosts(token, typeOfPost)}>
+                <div class="card-header" id="headingOne">
+                  <h5 class="mb-0">
+                    <button
+                      class="btn btn-link"
+                      data-toggle="collapse"
+                      data-target="#collapseOne"
+                      aria-expanded="true"
+                      aria-controls="collapseOne"
+                    >
+                      Post Types
+                    </button>
+                  </h5>
                 </div>
-              ))}
-            <div className="col-10 text-center" onClick={() => this.NavigateToPostsPage()}>
-              Posts
+
+                <div
+                  id="collapseOne"
+                  class="collapse show"
+                  aria-labelledby="headingOne"
+                  data-parent="#accordion"
+                >
+                  {!!values &&
+                    values.map(k => (
+                      <div className="card-body">
+                        <div>{k.key}</div>
+                        <div>{k.y}</div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+
+            <div id="accordion">
+              <div class="card" onClick={() => this.getStatusOfPosts(token, typeOfPost)}>
+                <div class="card-header" id="headingTwo">
+                  <h5 class="mb-0">
+                    <button
+                      class="btn btn-link"
+                      data-toggle="collapse"
+                      data-target="#collapseTwo"
+                      aria-expanded="true"
+                      aria-controls="collapseTwo"
+                    >
+                      Post Status
+                    </button>
+                  </h5>
+                </div>
+
+                <div
+                  id="collapseTwo"
+                  class="collapse show"
+                  aria-labelledby="headingTwo"
+                  data-parent="#accordion"
+                >
+                  {!!valueTypes &&
+                    valueTypes.map(k => (
+                      <div className="card-body">
+                        <div>{k.key}</div>
+                        <div>{k.y}</div>
+                      </div>
+                    ))}
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="col-10 mt-5">
             <div className="row">
               <div className="col-4 rf_pie_chart">
-                <PieChart options={options} userFreqPieChart={userFreqPieChart} />
+                <PieChart options={options} userFreqPieChart={toDisplayValues} />
               </div>
-              <div className="col-4 rf_box_w_elevation">
+              {/* <div className="col-4 rf_box_w_elevation">
                 <DeviceTable getUsersDeviceCountryWiseData={getUsersDeviceCountryWiseData} />
-              </div>
-              <div className="col-4 rf_box_w_elevation">
+              </div> */}
+              {/* <div className="col-4 rf_box_w_elevation">
                 <BarChart
                   options={this.state.barChartOptions}
                   series={this.state.series}
                   type="bar"
                   height="350"
                 />
-              </div>
+              </div> */}
             </div>
-            <div className="row">
+            {/* <div className="row">
               <div className="col-8 rf_box_w_elevation">
                 <Map getUsersFrequencyCountryWiseData={getUsersFrequencyCountryWiseData} />
               </div>
@@ -290,7 +325,7 @@ class Dashboard extends React.Component {
               <div className="col-4 text-center rf_box_w_elevation">
                 <Table getUsersFrequencyCountryWiseData={getUsersFrequencyCountryWiseData} />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -298,4 +333,4 @@ class Dashboard extends React.Component {
   }
 }
 
-export default Dashboard;
+export default Posts;
