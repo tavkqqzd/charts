@@ -10,7 +10,7 @@ import Map from "../../Components/Map/Map";
 import PieChart from "../../Components/PieChart/PieChart";
 // import BarChart from "../../Components/BarChart/BarChart";
 import PostCountryFilter from "../../Components/Table/PostCountryTable";
-import { VectorMap } from "react-jvectormap";
+
 var colors = [
   "#008FFB",
   "#00E396",
@@ -129,6 +129,7 @@ class Posts extends React.Component {
 
   /** API Calls happen here */
   getValueOfPosts = (token, typeOfPost) => {
+    // this.GetPostsByCountryFilter(token, 0, 0, 1);
     GetMainPosts(token, typeOfPost)
       .then(res => {
         let data = this.createNewArrayToRenderForValues(res.data.values);
@@ -281,7 +282,6 @@ class Posts extends React.Component {
 
   render() {
     let token = cookie.load("token");
-    let Worldmaparr = {};
     let {
       values,
       valueTypes,
@@ -290,14 +290,6 @@ class Posts extends React.Component {
       typeOfPost,
       filterPageCountryData
     } = this.state;
-    let mapData =
-      filterPageCountryData &&
-      filterPageCountryData.values &&
-      filterPageCountryData.values.length > 0
-        ? filterPageCountryData.values.map(
-            data => (Worldmaparr[data.index.match(/[^()]+/g)[1]] = data.country)
-          )
-        : "";
     return (
       <div className="col-12" style={{ height: "100vh" }}>
         <div className="row">
@@ -319,7 +311,11 @@ class Posts extends React.Component {
             <div id="accordion" className="p-3">
               <div className="card">
                 {/* <div className="card" onClick={() => this.getValueOfPosts(token, typeOfPost)}> */}
-                <div className="card-header" id="headingOne">
+                <div
+                  className="card-header"
+                  id="headingOne"
+                  onClick={() => this.GetPostsByCountryFilter(token, 0, 0, 1)}
+                >
                   <h5 className="mb-0">
                     <button
                       className="btn btn-default w-100 text-center"
@@ -439,50 +435,7 @@ class Posts extends React.Component {
             </div>
             <div className="row">
               <div className="col-8 rf_box_w_elevation">
-                <VectorMap
-                  map={"world_mill"}
-                  backgroundColor="transparent" //change it to ocean blue: #0077be
-                  zoomOnScroll={false}
-                  containerStyle={{
-                    width: "100%",
-                    height: "345px"
-                  }}
-                  onRegionClick={this.handleClick} //gets the country code
-                  onRegionTipShow={(e, el, code) => {
-                    let str =
-                      Worldmaparr[code] == undefined ? "No Users" : `Users - ${Worldmaparr[code]}`;
-                    el.html(el.html() + " (" + str + ")");
-                  }}
-                  containerClassName="map"
-                  regionStyle={{
-                    initial: {
-                      fill: "#e4e4e4",
-                      "fill-opacity": 0.9,
-                      stroke: "none",
-                      "stroke-width": 0,
-                      "stroke-opacity": 0
-                    },
-                    hover: {
-                      "fill-opacity": 0.8,
-                      cursor: "pointer"
-                    },
-                    selected: {
-                      fill: "#146804" //color for the clicked country
-                    },
-                    selectedHover: {}
-                  }}
-                  regionsSelectable={false}
-                  series={{
-                    regions: [
-                      {
-                        values: Worldmaparr, //this is your data
-                        scale: ["#146804"], // your color game's here
-                        normalizeFunction: "polynomial"
-                      }
-                    ]
-                  }}
-                />
-                {/* <Map getUsersFrequencyCountryWiseData={filterPageCountryData} /> */}
+                <Map getUsersFrequencyCountryWiseData={filterPageCountryData} />
               </div>
               {/* 
               <div className="col-4 text-center rf_box_w_elevation">
