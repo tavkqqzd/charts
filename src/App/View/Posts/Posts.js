@@ -297,7 +297,7 @@ class Posts extends React.Component {
             <div
               className="d-flex"
               onClick={() => this.backToDashboard()}
-              style={{ marginTop: "48px" }}
+              style={{ marginTop: "48px", marginLeft: "0px", marginRight: "0px" }}
             >
               <div className="pl-3">
                 <img
@@ -308,7 +308,7 @@ class Posts extends React.Component {
               </div>
               <div className="pl-3 pt-1">DASHBOARD</div>
             </div>
-            <div id="accordion" className="p-3">
+            <div id="accordion" className="p-3 ml-0 mr-0 mb-3">
               <div className="card">
                 {/* <div className="card" onClick={() => this.getValueOfPosts(token, typeOfPost)}> */}
                 <div
@@ -361,7 +361,7 @@ class Posts extends React.Component {
               </div>
             </div>
 
-            <div id="accordion" className="p-3">
+            <div id="accordion" className="p-3 ml-0 mr-0">
               <div className="card" onClick={() => this.getStatusOfPosts(token, typeOfPost)}>
                 <div className="card-header" id="headingTwo">
                   <h5 className="mb-0">
@@ -417,30 +417,18 @@ class Posts extends React.Component {
           </div>
 
           <div className="col-10 mt-5">
-            <div className="row">
-              <div className="col-4 rf_pie_chart">
+            <div className="row justify-content-center">
+              <div className="col-5 rf_pie_chart">
                 <PieChart options={options} userFreqPieChart={toDisplayValues} />
               </div>
-              <div className="col-4 rf_box_w_elevation">
+              <div className="col-5 rf_box_w_elevation">
                 <PostCountryFilter getUsersDeviceCountryWiseData={filterPageCountryData.values} />
               </div>
-              {/* <div className="col-4 rf_box_w_elevation">
-                <BarChart
-                  options={this.state.barChartOptions}
-                  series={this.state.series}
-                  type="bar"
-                  height="350"
-                />
-              </div> */}
             </div>
-            <div className="row">
-              <div className="col-8 rf_box_w_elevation">
+            <div className="row justify-content-center">
+              <div className="col-10 rf_box_w_elevation">
                 <Map getUsersFrequencyCountryWiseData={filterPageCountryData} />
               </div>
-              {/* 
-              <div className="col-4 text-center rf_box_w_elevation">
-                <Table getUsersFrequencyCountryWiseData={getUsersFrequencyCountryWiseData} />
-              </div> */}
             </div>
           </div>
         </div>
